@@ -1,8 +1,24 @@
 package at.hazm.anthidium
 
 import java.nio.ByteBuffer
+import java.nio.channels.CompletionHandler
+
+import scala.util.{Failure, Success, Try}
 
 package object io {
+
+  def using[P <: AutoCloseable, R](r:P)(f:(P) => R):R = try {
+    f(r)
+  } finally {
+    r.close()
+  }
+
+  def onComplete[T, U](f:PartialFunction[Try[T], Unit]):CompletionHandler[T, U] = new CompletionHandler[T, U] {
+    override def completed(result:T, attachment:U):Unit = f(Success(result))
+
+    override def failed(ex:Throwable, attachment:U):Unit = f(Failure(ex))
+
+  }
 
   class UINT16(val value:Int) extends AnyVal
 
@@ -10,11 +26,20 @@ package object io {
 
   class UINT64(val value:BigInt) extends AnyVal
 
+  val MaxUINT16 = BigInt(0xFFFF)
+  val MaxUINT32 = BigInt(0xFFFFFFFFL)
   val MaxUINT64 = BigInt("FFFFFFFFFFFFFFFF", 16)
+
+  val MaxVARUINT16Bytes:Int = VARUINT.byteSize(MaxUINT16)
+  val MaxVARUINT32Bytes:Int = VARUINT.byteSize(MaxUINT32)
+  val MaxVARUINT64Bytes:Int = VARUINT.byteSize(MaxUINT64)
 
   /**
     */
   implicit class _ByteBuffer(buffer:ByteBuffer) {
+
+    def getUINT16:UINT16 = new UINT16(buffer.getShort() & 0xFFFF)
+    def getUINT32:UINT32 = new UINT32(buffer.getInt() & 0xFFFFFFFFL)
 
     def getVARINT16:Short = VARINT.read(buffer, 16).toShort
 

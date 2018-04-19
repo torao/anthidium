@@ -6,7 +6,7 @@ package at.hazm.anthidium.io
 class FormatException(message:String, ex:Throwable) extends Exception(message, ex) {
   def this(message:String) = this(message, null)
 
-  def this(ex:Throwable) = this(null, ex)
+  def this(ex:Throwable) = this(ex.toString, ex)
 
   def this() = this(null, null)
 }

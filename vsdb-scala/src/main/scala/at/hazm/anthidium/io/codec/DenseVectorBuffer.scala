@@ -1,5 +1,5 @@
 package at.hazm.anthidium.io.codec
 
-trait DenseVectorBuffer {
-
+trait DenseVectorBuffer[T] {
+  def getBuffer:Array[T]
 }

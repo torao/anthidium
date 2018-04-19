@@ -1,5 +1,5 @@
 package at.hazm.anthidium
 
-class WritableSession {
+trait WritableSession[NDARRAY] extends Session[NDARRAY] {
 
 }

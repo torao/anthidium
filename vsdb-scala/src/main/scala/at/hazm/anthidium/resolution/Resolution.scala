@@ -1,32 +1,45 @@
-package at.hazm.anthidium
+package at.hazm.anthidium.resolution
 
 import java.nio.ByteBuffer
 
-import at.hazm.anthidium.io.Codec
-import at.hazm.anthidium.io.codec.DoubleCodec
+import org.nd4j.linalg.api.ndarray.INDArray
+import org.nd4j.linalg.factory.Nd4j
 
 /**
   * 空間解像度はベクトル空間の各次元を表す数値の精度を表しています。アプリケーションに対してはあるベクトル空間で使用する数値の型を意味
   * します。解像度によってデータの保存形式やメモリ上での表現が異なります。
-  *
-  * @param id 解像度のID
-  * @tparam T 解像度が演算に使用する型
   */
-sealed abstract class Resolution[T](val id:Int) {
-
-  def codec:Codec[T, Byte]
+trait Resolution {
 
   /**
-    * 指定されたバッファの内容を密ベクトルに変換します。
+    * 指定された多次元配列を出力用のバッファに変換します。
+    *
+    * @param values 変換する多次元配列
+    * @return 出力用のバッファ
+    */
+  def encode(values:INDArray):ByteBuffer
+
+  /**
+    * 指定されたバッファの内容を多次元配列に変換します。
     *
     * @param buffer 読み込むバッファ
     * @param length ベクトルの長さ
     * @return 読み込んだ密ベクトル
     */
-  def readDenseArray(buffer:ByteBuffer, length:Int):Array[T]
+  def decode(buffer:ByteBuffer, length:Int):INDArray
 }
 
 object Resolution {
+
+  /**
+    * 指定された解像度コードに対する解像度を参照します。
+    *
+    * @param resolution 解像度コード
+    * @return 解像度
+    */
+  def apply(resolution:Int):Resolution = resolution match {
+    case 0xD => FLOAT64
+  }
 
   /*
   case object BIT extends Resolution[Byte](0x0) {
@@ -130,13 +143,13 @@ object Resolution {
 
   */
 
-  case object FLOAT64 extends Resolution[Double](0xD) {
-    override val codec:Codec[Double, Byte] = DoubleCodec
+  case object FLOAT64 extends Resolution {
+    override def encode(values:INDArray):ByteBuffer = {
+      ByteBuffer.wrap(values.data().asBytes())
+    }
 
-    override def readDenseArray(buffer:ByteBuffer, length:Int):Array[Double] = {
-      val array = new Array[Double](length)
-      buffer.asDoubleBuffer().get(array)
-      array
+    override def decode(buffer:ByteBuffer, length:Int):INDArray = {
+      Nd4j.create(buffer.asDoubleBuffer().array())
     }
   }
 

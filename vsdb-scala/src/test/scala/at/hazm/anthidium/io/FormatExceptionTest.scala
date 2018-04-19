@@ -1,7 +1,5 @@
 package at.hazm.anthidium.io
 
-import java.nio.{ByteBuffer, ByteOrder}
-
 import org.scalatest._
 
 class FormatExceptionTest extends FlatSpec with Matchers {
