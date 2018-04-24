@@ -26,11 +26,24 @@ namespace vsdb {
     class Error : public std::runtime_error {
     public:
         /** エラーコード */
-        const char* code;
+        const char const *code;
 
-        Exception(const char* code, const std::string &message) : std::runtime_error(std::to_string(code) + ": " + message) {
+        /**
+         * エラーコードとエラー発生状況のメッセージを指定して構築します。
+         * @param code エラーコード
+         * @param message エラーメッセージ
+         */
+        Error(const char *code, const std::string &message) : std::runtime_error(std::string(code) + ": " + message) {
             this->code = code;
         }
+    };
+
+    class IOError : public Error {
+    public:
+        IOError(const char *code, const std::string &message = "") : Error(code,
+                                                                           message.length() == 0 ? errno_message() : (
+                                                                                   message + " (" + errno_message() +
+                                                                                   ")")) {/* */}
     };
 
     /**
