@@ -10,13 +10,22 @@
 
 namespace vsdb {
 
+    /**
+     * ベクトル空間データベース。
+    */
     class Database final {
     private:
         std::string filename;
         int fd;
 
+        /**
+         * データベースの初期化。
+         */
         void init() const;
 
+        /**
+         * データベースの検証。
+         */
         void verify() const;
 
     public:
@@ -24,6 +33,9 @@ namespace vsdb {
 
         ~Database();
 
+        /**
+         * このデータベースをオープンします。
+         */
         void open();
 
         void close();

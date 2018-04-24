@@ -2,11 +2,15 @@
 // Created by Takami Torao on 2018/04/22.
 //
 
+#include <string>
 #include <functional>
 #include <iostream>
+#include <sys/unistd.h>
 #include "core.h"
 
 namespace vsdb {
+
+    const std::runtime_error OUT_OF_MEMORY_ERROR("out of memory");
 
     /** 内部的に使用するエラーメッセージ領域 */
     thread_local std::string error_message;
@@ -57,7 +61,7 @@ namespace vsdb {
     Buffer::Buffer(size_t size, bool extensible) {
         this->buffer = (uint8_t *) malloc(size);
         this->m_position = 0;
-        this->m_limit = 0;
+        this->m_limit = size;
         this->m_capacity = size;
         this->extensible = extensible;
     }
@@ -67,16 +71,19 @@ namespace vsdb {
     }
 
     void Buffer::ensure_capacity(size_t size) {
-        if (this->m_position + size > this->m_capacity) {
+        if (m_position + size > m_limit) {
             if (!extensible) {
-                throw std::runtime_error("buffer exceeds the capacity");
+                throw std::runtime_error("data exceeds the buffer limit");
             } else {
-                size_t len = this->m_capacity + size + m_capacity * 2;
-                this->buffer = (uint8_t *) ::realloc(this->buffer, len);
-                if (buffer == nullptr) {
-                    throw std::runtime_error("out of memory");
+                if (m_position + size > m_capacity) {
+                    size_t len = m_capacity + size + std::min(m_capacity * 2, 8 * 1024);
+                    buffer = (uint8_t *) realloc(buffer, len);
+                    if (buffer == nullptr) {
+                        throw OUT_OF_MEMORY_ERROR;
+                    }
+                    m_capacity = len;
                 }
-                m_capacity = len;
+                m_limit = m_position + size;
             }
         }
     }
@@ -105,12 +112,35 @@ namespace vsdb {
         m_position += 8;
     }
 
-    Buffer *Buffer::put(uint8_t *b, off_t offset, size_t size){
+    Buffer *Buffer::put(uint8_t *b, off_t offset, size_t size) {
         ensure_capacity(size);
-        for(size_t i=0; i<size; i++){
+        for (size_t i = 0; i < size; i++) {
             buffer[m_position + i] = b[offset + i];
         }
         m_position += size;
+    }
+
+    size_t Buffer::read(int fd) {
+        size_t size = remaining();
+        if (size > 0) {
+            size_t len = ::read(fd, buffer + m_position, size);
+            m_position += len;
+            return len;
+        }
+        return size;
+    }
+
+    size_t Buffer::write(int fd){
+        size_t size = remaining();
+        if(size > 0){
+            size_t len = ::write(fd, buffer + m_position, size);
+            if(len < 0){
+
+            }
+            m_position += len;
+            return len;
+        }
+        return size;
     }
 
 }

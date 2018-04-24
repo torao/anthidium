@@ -67,4 +67,5 @@ namespace vsdb {
         ::lseek(fd, 0, SEEK_SET);
         ::write(fd, buffer.array(), buffer.limit());
     }
+
 }
