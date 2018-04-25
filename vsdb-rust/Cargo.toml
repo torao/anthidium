@@ -4,3 +4,5 @@ version = "0.1.0"
 authors = ["torao <koiroha@gmail.com>"]
 
 [dependencies]
+fs2 = "0.4.3"
+byteorder = "1"
