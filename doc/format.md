@@ -1,15 +1,10 @@
-# Data File Format
+# データファイルフォーマット
 
-## Basic
+## 基本構造
 
-* All signed/unsigned multi-byte integer `INT16`, `INT32` and `INT64` are stored in Little Endian.
-* Application data indicated by `JSON` type is actually saved in MessagePack format.
+### データ型
 
-## Common Structure
-
-### Data Types
-
-The data types described in this format specification are as follows:
+このフォーマット仕様で説明するデータ型は以下の通り:
 
 | Notation  |     Size[B] | Name                     | Values |
 |:----------|------------:|:-------------------------|:-------|
@@ -21,7 +16,9 @@ The data types described in this format specification are as follows:
 | `FLOAT`   | 2,4,8,10,16 | floating point           |
 | `JSON`    |           * | json representation      |
 
-The `JSON` type is a complex type of `VARUINT32` length and JSON binary encoded with MessagePack.
+全ての符号付きおよび符号なしマルチバイト整数はリトルエンディアンの配置で保存しなければならない。
+
+`JSON` 型で示されるアプリケーションデータは、続くバイナリデータの長さを示す `VARUINT32` 型と MessagePack でフォーマットされた JSON 構造のバイナリである。
 
 | Notation    | Size[B] | Name                        |
 |:------------|--------:|:----------------------------|

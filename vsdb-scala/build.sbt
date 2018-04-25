@@ -1,7 +1,7 @@
 organization := "at.hazm"
 name := "anthedium"
 version := "0.1.0"
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.5"
 description := "vector-space database"
 libraryDependencies ++= Seq(
   "javax.json" % "javax.json-api" % "1.1.2",
