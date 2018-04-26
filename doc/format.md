@@ -2,6 +2,8 @@
 
 ## 基本構造
 
+Vector Space Database は単一ファイルデータベースである。ジャーナルや中間ファイルとして別のファイルを使用する可能性もあるが、マスターのファイルのみを保全すれば整合性は
+
 ### データ型
 
 このフォーマット仕様で説明するデータ型は以下の通り:
@@ -88,18 +90,24 @@ All implementations MUST acquire exclusive lock on this 4-bytes when it writes d
 | 1          | type        | `UINT8`        | Meta-Info Signature `'^'`       |
 | 4          | length      | `UINT32`       | Header Size                     |
 | *          | rank        | `VARUINT32`    | Rank of Vector Space            |
-| *          | dimensions  | `VARUINT32[*]` | Dimension × Rank                |
-| 1          | resolution  | `UINT8`        | Resolution Type                 |
-| 1          | pack        | `UINT8`        | Pack Method for Vector          |
-| 1          | paging      | `UINT8`        | Paging Structure and Method     |
+| *          | dimensions  | `VARUINT32[*]` | Dimension × Rank               |
+| 1          | resolution  | `INT8`         | Resolution Type                 |
+| 1          | compression | `UINT8`        | Compression Method for Vector   |
+| 1          | indexing    | `UINT8`        | Indexing Structure and Method   |
 | *          | attributes  | `JSON`         | Application Specified Attribute |
 
 A static type is assigned as resolution of the individual vector space. The type identifier is embedded in the header block, and the following values are assigned to each type.
 Type code is present as following `INT8` values:
 
+resolution は空間解像度としてベクトル空間のそれぞれに割り当てられた単一の数値型を表す値である。
+
+この仕様に従う実装は `FLOAT32`, `FLOAT64` を実装しなければならない。
+それ以外の
+`FLOAT16`, `FLOAT80`, `FLOAT128` は実装依存である。
+
 | TYPE       | Code | Size of Element |
 |:-----------|:-----|:-----|
-| `BOOL`     | `0`  | 1/8  |
+| `BIT`      | `0`  | 1/8  |
 | `UINT8`    | `1`  | 1    |
 | `INT8`     | `-1` | 1    |
 | `UINT16`   | `2`  | 2    |
@@ -108,17 +116,21 @@ Type code is present as following `INT8` values:
 | `INT32`    | `-3` | 4    |
 | `UINT64`   | `4`  | 8    |
 | `INT64`    | `-4` | 8    |
+| `FLOAT16`  | `10` | 2    |
 | `FLOAT32`  | `11` | 4    |
 | `FLOAT64`  | `12` | 8    |
-| `STRING`   | `100` | *   |
-| `JSON`     | `101` | *   |
+| `FLOAT80`  | `13` | 10   |
+| `FLOAT128` | `14` | 16   |
 
-Vector compression constant is represent as 3bit
+ユーザはストレージに保存されるベクトル値 (数値配列) の圧縮方法を指定することができる。ただし `FLOAT` 解像度空間でのベクトル値圧縮は効果がないどころかサイズが増加することがある。
 
-| Code | Compression |
-|:---|:----|
-| `0b000` | Uncompressed `FLOAT64` Array |
-| `0b001` | Snappy Compressed Array |
+圧縮方法のコードは符号なし 3bit 整数で表される。
+
+| Code    | Compression  |
+|:--------|:-------------|
+| `0b000` | Uncompressed |
+| `0b001` | LZ4          |
+| `0b010` | ZStandard    |
 
 ## Blank Block
 
