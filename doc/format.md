@@ -136,7 +136,7 @@ resolution は空間解像度としてベクトル空間のそれぞれに割り
 
 | TYPE     | Description | Example |
 |:---------|:------------|:--------|
-| `ASCII`  | Entry Type  | `'0'`   |
+| `UINT8`  | Entry Type  | `'0'`   |
 | `UINT32` | Entry Size  | `0`     |
 
 If delete specific entry, you can overwrite Entry Type to `'0'`.

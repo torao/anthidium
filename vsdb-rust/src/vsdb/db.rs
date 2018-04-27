@@ -6,7 +6,7 @@ use self::fs2::FileExt;
 use std::error::Error;
 use std::fs::{File, OpenOptions};
 use std::io::{BufReader, Cursor, BufWriter, Read, SeekFrom};
-use vsdb::Resolution
+use vsdb::Resolution;
 
 /// 2バイトのファイルシグネチャ。
 const FILE_SIGNATURE: [u8; 2] = ['V', 'S'].iter().map(|ch| ch as u8).collect::<[u8; 2]>();
@@ -82,7 +82,7 @@ fn create(mut file: File) -> Result<(), String> {
   cursor.write_u16::<LittleEndian>(FILE_VERSION)?;
 
   // Meta-Information Block
-  cursor.write_u8('^' as u8);
+  cursor.write_u8('^' as u8)?;
 
   file.seek(SeekFrom::Start(0)).and_then(|_| {
     let mut out = BufWriter::new(file);
@@ -94,7 +94,10 @@ fn create(mut file: File) -> Result<(), String> {
   }).map_err(|error| Err(error.description()))
 }
 
-fn create_meta_information(dimensions: &[u8], resolution: Resolution) -> Result<[u8], String> {}
+fn create_meta_information(dimensions: &[u8], resolution: Resolution) -> Result<[u8], String> {
+  let buffer: Vec<u8> = Vec::new();
+  let mut cursor = Cursor::new(buffer);
+}
 
 /// 指定されたファイルからヘッダを読み込んで確認します。
 ///

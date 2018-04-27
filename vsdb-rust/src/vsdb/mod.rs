@@ -1,6 +1,6 @@
 mod db;
 
-/// ベクトル空間の解像度 (成分を表現する型) を示す符号付き 8bit コード
+/// ベクトル空間の解像度 (成分を表現する型) を示す符号付き 8bit コード。
 enum Resolution {
   BIT = 0,
   UINT8 = 1,
@@ -18,7 +18,7 @@ enum Resolution {
   FLOAT128 = 14,
 }
 
-/// ベクトルデータの圧縮方法を示す符号なし 3bit コード
+/// ベクトルデータの圧縮方法を示す符号なし 3bit コード。
 enum Compression {
   /// 圧縮なし
   UNCOMPRESS = 0x00,
